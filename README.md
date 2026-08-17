@@ -1,513 +1,1008 @@
-**\# DailyLife**
+# DailyLife
 
-Personal daily management & productivity app --- MERN stack.
+Personal daily management and productivity app built with the MERN stack.
 
-**\## Status: Deployment Ready 🚀**
+## Status: Deployment Ready 🚀
 
-Phase 1 built the skeleton, Phase 2 added authentication, Phase 3 added
-Tasks, Phase 4 added Expenses, Phase 5 added Daily Summary, Phase 6
-added Habits, Phase 7 added the Activity system (timeline + heatmap).
-Phase 8 filled out Analytics (cross-feature trends) and a fuller Profile
-(edit bio/avatar, change password) --- every sidebar item is now a real
-page, nothing left marked "Soon" except Settings. Phase 9 is a polish
-pass across the whole app: dark mode, toasts on every
-create/update/delete/toggle action, consistent loading/empty/error
-states, subtle animations, a responsive tightening pass, an
-accessibility audit, and route-based code splitting for load
-performance.
+DailyLife has progressed through the major application phases:
 
-**\## Project structure**
+- **Phase 1** — Application skeleton
+- **Phase 2** — Authentication
+- **Phase 3** — Tasks
+- **Phase 4** — Expenses
+- **Phase 5** — Daily Summary
+- **Phase 6** — Habits
+- **Phase 7** — Activity system (timeline + heatmap)
+- **Phase 8** — Analytics and Profile
+- **Phase 9** — UI/UX polish, dark mode, toasts, loading/error states, accessibility, responsiveness, and route-based code splitting
 
-\`\`\` DailyLife/ ├── backend/     Express + MongoDB API ├── frontend/  
- React (Vite) + Tailwind └── README.md \`\`\`
+The application is now feature-complete and ready for deployment and production verification.
 
-**\## Prerequisites**
+---
 
-\- Node.js 18+ - A MongoDB instance --- either:   - Local: \`mongod\`
-running on \`mongodb://127.0.0.1:27017\`, or   - \[MongoDB
-Atlas\](https://www.mongodb.com/atlas) free-tier cluster (recommended if
-you don't want to install Mongo locally)
+## Features
 
-**\## Setup**
+### Authentication
 
-**\### 1. Backend**
+- User registration and login
+- Password hashing with bcrypt
+- Two-token authentication:
+  - Short-lived JWT access token
+  - Long-lived refresh token
+- Authentication credentials stored in **HTTP-only cookies**
+- Automatic access-token refresh
+- Refresh-token rotation
+- Refresh-token revocation on logout
+- Protected routes
+- Public-only routes for Login/Register
+- User ownership isolation across application data
 
-\`\`\`bash cd backend cp .env.example .env \# edit .env if using Atlas:
-set MONGO_URI to your connection string, and set a real JWT_SECRET npm
-install npm run dev \`\`\`
+### Tasks
 
-You should see: \`\`\` MongoDB connected: \<host\> DailyLife API running
-in development mode on port 5000 \`\`\`
+- Create, edit, and delete tasks
+- Task priorities
+- Due dates
+- Time ranges
+- Today / Upcoming / Completed filters
+- Search
+- Sorting by due date / priority
+- Optimistic completion updates
+- Progress percentage
+- Setting progress to **100% automatically completes the task**
+- User-specific task ownership
 
-Verify it directly: open \`http://localhost:5000/api/health\` --- you
-should get \`{"success":true,"message":"DailyLife API is running"}\`.
+### Habits
 
-**\### 2. Frontend**
+- Create and manage habits
+- Daily completion tracking
+- Habit streaks
+- Completion history
+- Activity integration
+- Avoids duplicate activity records for repeated mark/unmark operations
 
-In a second terminal:
+### Expenses
 
-\`\`\`bash cd frontend cp .env.example .env npm install npm run dev
-\`\`\`
+- Create, edit, and delete expenses
+- Expense categories
+- Payment methods
+- Date-based filtering
+- Search and sorting
+- Spending overview
+- Category distribution
+- Daily spending trends
+- Week / Month / Year views
+- Aggregation-based statistics
 
-Open the printed local URL (typically \`http://localhost:5173\`).
+### Daily Summary
 
-**\## What to check for Phase 2**
+- Daily reflection
+- Mood tracking
+- Star rating
+- Accomplishments/reflections
+- One summary per user per day
+- Create with `POST`
+- Edit with `PUT`
+- Previous-day navigation
+- Future-day navigation disabled
+- Live task-completion and spending statistics
 
-1\. Open the frontend --- you'll be redirected to \`/login\` since
-there's no session yet. 2. Click **\*\*Create one\*\***, register with a
-name/email/password (6+ chars). You should land on    the dashboard
-immediately, greeted by name, with your email shown. 3. Refresh the
-page. You should **\*\*stay logged in\*\*** (the token in
-\`localStorage\` is validated    against \`GET /api/auth/me\` on load)
-instead of being bounced back to \`/login\`. 4. Click **\*\*Log
-out\*\***, confirm you're sent back to \`/login\`. 5. Log back in with
-the same credentials on the Login page. 6. Try registering a second
-account with the same email --- you should get a clear    "account with
-this email already exists" error instead of a crash or generic 500. 7.
-Try logging in with a wrong password --- you should get "Invalid email
-or password" (not    a hint about which field was wrong, to avoid
-leaking whether an email is registered).
+### Activity
 
-You can also test the API directly: \`\`\`bash curl -X POST
-http://localhost:5000/api/auth/register \\   -H "Content-Type:
-application/json" \\   -d '{"name":"Test
-User","email":"test@example.com","password":"secret123"}' \`\`\` This
-returns \`{ success, token, user }\`. Use that token to hit a protected
-route: \`\`\`bash curl http://localhost:5000/api/auth/me -H
-"Authorization: Bearer \<token\>" \`\`\`
+- Recent activity timeline
+- Activity heatmap
+- Tracks meaningful events such as:
+  - Task completion
+  - Habit completion
+  - Expense creation
+  - Daily reflection
+- Activity is stored in a dedicated `Activity` collection
+- Activity logging is best-effort and does not block the primary action
+- Un-completing a task/habit does not create another activity
+- Editing an existing item does not create an unrelated activity
+- Activity is isolated per user
 
-**\## What to check for Phase 3**
+### Analytics
 
-1\. Log in, go to **\*\*Tasks\*\*** in the sidebar. 2. Add a task with a
-due date of today, a priority, and a time range --- confirm it appears.
-3. Check the box to mark it complete --- it should show a strikethrough
-immediately (optimistic    update) and stay completed after a page
-refresh. 4. Go back to **\*\*Dashboard\*\*** --- the task should appear
-under "Today's Tasks" if its due date is    today, reflecting the same
-completed/pending state. 5. On the Tasks page, try the **\*\*Today /
-Upcoming / Completed\*\*** view filters, the search box    (type part of
-a task title), and the sort dropdown (due date / priority). 6. Edit a
-task's title, delete a task, confirm both persist after refresh. 7.
-Confirm you cannot see another user's tasks: register a second account
-in an incognito    window --- its Tasks page should start empty even
-though the first account has tasks.
+- Cross-feature trends
+- Task analytics
+- Habit/activity trends
+- Spending analytics
+- Recharts visualizations
+- Time-based analysis
 
-API directly: \`\`\`bash curl http://localhost:5000/api/tasks -H
-"Authorization: Bearer \<token\>" curl -X POST
-http://localhost:5000/api/tasks \\   -H "Authorization: Bearer
-\<token\>" -H "Content-Type: application/json" \\   -d '{"title":"Write
-README","priority":"high","dueDate":"2026-08-16"}' \`\`\`
+### Profile
 
-**\## What to check for Phase 4**
+- View profile
+- Edit name
+- Edit bio
+- Upload avatar
+- Change password
+- Member-since information
+- Personal activity heatmap
+- Personal activity timeline
 
-1\. Log in, go to **\*\*Expenses\*\*** in the sidebar. 2. Click
-**\*\*Add Expense\*\*** --- enter an amount, pick a category,
-description, payment method,    and today's date. Confirm it appears in
-the list and the total in the list header updates. 3. Check the
-**\*\*Spending overview\*\*** card at the top --- the donut chart should
-show your new    expense's category, and the daily trend bar chart
-should show a bar for today. Switch    between **\*\*Week / Month /
-Year\*\*** --- the charts should refetch and update. 4. Go back to
-**\*\*Dashboard\*\*** --- the quick-stats row should show "Spent today"
-matching what you    just added, and the **\*\*Today's Expenses\*\***
-widget (next to Today's Tasks) should list it. 5. On the Expenses page,
-try the **\*\*Today / This week / This month\*\*** view filters, the
-category    dropdown, the search box (matches description), and the sort
-dropdown. 6. Edit an expense's amount, delete an expense, confirm both
-persist after refresh and the    charts update accordingly. 7. Confirm
-ownership isolation still holds: a second account's Expenses page starts
-empty.
+### Cloudinary Avatar Uploads
 
-API directly: \`\`\`bash curl -X POST http://localhost:5000/api/expenses
-\\   -H "Authorization: Bearer \<token\>" -H "Content-Type:
-application/json" \\   -d
-'{"amount":250,"category":"Food","description":"Lunch","paymentMethod":"UPI"}'
-curl "http://localhost:5000/api/expenses/stats?period=month" -H
-"Authorization: Bearer \<token\>" \`\`\`
+- Browser uploads profile images as `multipart/form-data`
+- Multer uses memory storage
+- Backend uploads the image buffer to Cloudinary
+- Images are stored under `dailylife/avatars`
+- Cloudinary `secure_url` is stored in `User.avatar`
+- Cloudinary public ID is retained for future replacement
+- Supported formats: JPG, PNG, WEBP, GIF
+- Maximum size: 5 MB
+- Cloudinary API secret is backend-only
 
-**\## What to check for Phase 5**
+### UI / UX
 
-1\. Log in, go to **\*\*Summary\*\*** in the sidebar. You should land on
-today, with a stats row    showing today's tasks-completed count and
-money spent (pulled live --- add a task/expense    on another tab and
-refresh to see it change). 2. Fill in the three reflection boxes, pick a
-mood emoji, set a star rating, and \*\*Save    Summary\*\*. You should
-see a "Saved." confirmation. 3. Refresh the page --- your reflection
-should still be there (this is now an *\*update\**, not a    create ---
-the Save button silently uses \`PUT\` once a summary exists for that
-date). 4. Go back to **\*\*Dashboard\*\*** --- a card near the bottom
-should now show your mood emoji, "Today's    reflection saved", and your
-star rating; tapping it returns you to the Summary page. 5. On the
-Summary page, use the **\*\*◀ / ▶\*\*** arrows to go back a day (forward
-is disabled once    you're back at today --- you can't reflect on a day
-that hasn't happened). A past day with no    summary should show an
-empty form ready for **\*\*Create\*\*** (POST); a past day you've
-already    filled in should load and let you edit it (PUT). 6. Try
-creating two summaries for the same date via the API directly (below)
---- the second    POST should fail with a clear 409, not a duplicate
-record.
+- Responsive layout
+- Dark/light mode
+- Toast notifications
+- Loading skeletons
+- Empty states
+- Error states with retry
+- Shared modal component
+- Escape-to-close modals
+- Backdrop-to-close modals
+- Focus management
+- Responsive mobile navigation
+- Route-based code splitting
+- Accessibility improvements
+- `prefers-reduced-motion` support
 
-API directly: \`\`\`bash curl
-http://localhost:5000/api/summaries/2026-08-17 -H "Authorization: Bearer
-\<token\>" curl -X POST http://localhost:5000/api/summaries \\   -H
-"Authorization: Bearer \<token\>" -H "Content-Type: application/json" \\
-  -d
-'{"date":"2026-08-17","mood":"good","rating":4,"accomplishments":"Shipped
-Phase 5"}' \`\`\`
+---
 
-**\## What to check for Phase 7**
+# Tech Stack
 
-1\. Log in and go to **\*\*Dashboard\*\***. Below the Daily Summary card
-you should now see an    **\*\*Activity heatmap\*\*** (last 18 weeks)
-and a **\*\*Recent Activity\*\*** feed. 2. Complete a task (Tasks page,
-checkbox), mark a habit done (Habits page), add an expense    (Expenses
-page), and save a daily summary (Summary page) --- one action at a time.
-3. After each action, go back to **\*\*Dashboard\*\*** and refresh: the
-Recent Activity feed should    show a new entry ("Completed task: ...",
-"Completed habit: ...", "Logged an expense: ...",    "Wrote a daily
-reflection"), most recent first, and today's cell in the heatmap should
-get    darker as the day's count goes up. 4. Un-complete the task or
-habit you just marked done (tap it again) --- confirm \*\*no new  
- activity entry is added\*\* for the undo (only completions are logged,
-not un-completions). 5. Edit an existing task's title or category
-without changing its status, or edit an    expense's amount --- confirm
-this does **\*\*not\*\*** add a new activity entry either (only the  
- original completion/creation events are logged). 6. Go to
-**\*\*Profile\*\*** in the sidebar (no longer marked "Soon") --- you
-should see your name,    email, and member-since date, a fuller
-(53-week) activity heatmap, and a longer activity    timeline (up to 30
-entries). 7. Confirm ownership isolation still holds: a second account's
-Dashboard/Profile activity    feed and heatmap start empty, showing none
-of the first account's activity.
+## Frontend
 
-API directly: \`\`\`bash curl
-"http://localhost:5000/api/activity?limit=10" -H "Authorization: Bearer
-\<token\>" curl "http://localhost:5000/api/activity/heatmap?days=30" -H
-"Authorization: Bearer \<token\>" \`\`\`
+- React
+- Vite
+- React Router
+- Tailwind CSS
+- Axios
+- Recharts
+- Lucide React
 
-**\## Design system (established now, refined in Phase 9)**
+## Backend
 
-\- **\*\*Palette\*\***: warm paper background (\`#F7F7F4\`), deep
-forest-green brand accent (\`#1F6F5C\`)   for growth/habits, amber
-(\`#C98A2C\`) for streaks, coral (\`#C1493E\`) for spend/alerts. -
-**\*\*Type\*\***: Fraunces (display, used sparingly for
-greetings/headers), Inter (UI body text),   IBM Plex Mono (numbers ---
-task counts, currency, stats) for a "dashboard data" feel. - Defined in
-\`frontend/tailwind.config.js\` and \`frontend/src/index.css\`.
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT
+- bcrypt
+- express-validator
+- Multer
+- Cloudinary
 
-**\## Architecture decisions made this phase**
+## Database / Storage
 
-\- **\*\*Backend\*\***: MVC + service layer (\`config/\`, \`models/\`,
-\`controllers/\`, \`routes/\`,   \`middleware/\`, \`services/\`).
-Controllers stay thin; business logic (streaks, analytics   aggregation)
-will live in \`services/\` starting Phase 6--8. - **\*\*Centralized
-error handling\*\***: every controller will use
-\`express-async-handler\`, so thrown   errors (bad ObjectIds, validation
-errors, duplicate keys, JWT errors) are normalized into   consistent
-JSON responses by \`middleware/errorMiddleware.js\` instead of being
-handled ad hoc. - **\*\*Frontend\*\***: Vite + React Router (browser
-router already wraps the app in \`main.jsx\`), Axios   instance in
-\`services/api.js\` that auto-attaches the JWT once auth exists,
-Recharts for all   analytics charts, \`lucide-react\` for icons. -
-**\*\*No premature tech\*\***: no Redis, BullMQ, Socket.IO, or Docker
-yet, per the phased plan.
+- MongoDB Atlas
+- Cloudinary
 
-**\## Phase 2 architecture decisions**
+## Development Tools
 
-\- **\*\*Password security\*\***: hashing happens in a Mongoose
-\`pre('save')\` hook on the \`User\` model,   not in the controller ---
-so it's impossible to accidentally save a plaintext password from   any
-code path. The field is \`select: false\` by default; login explicitly
-opts in with   \`.select('+password')\`. - **\*\*JWT payload stays
-minimal\*\***: just \`{ id }\`. Every protected request re-derives the
-current   user by looking up that id --- never trusting a
-name/email/role embedded in an old token. - **\*\*Ownership model,
-established now for Phase 3+\*\***: \`protect\` middleware attaches
-\`req.user\`   from the verified token. When Tasks/Habits/Expenses
-arrive, controllers will scope every   query with \`req.user.id\` and
-never read a \`userId\` from the request body --- this is what   stops
-one user from reading or modifying another user's data. -
-**\*\*Validation\*\***: \`express-validator\` chains live in the route
-file (\`authRoutes.js\`), with a   shared \`validate\` middleware that
-turns failures into one clean 400 error, keeping   controllers focused
-on business logic only. - **\*\*Frontend session handling\*\***:
-\`AuthContext\` holds \`user\`/\`loading\`/\`error\` and persists only  
-the JWT (in \`localStorage\`); on app load it re-validates that token
-against \`/auth/me\` rather   than trusting a cached user object, so a
-revoked/expired token doesn't leave someone in a   false "logged in"
-state. \`ProtectedRoute\` blocks \`/\`, \`PublicOnlyRoute\` blocks
-\`/login\` and   \`/register\` once already authenticated.
+- Git
+- GitHub
+- VS Code
+- Postman
+- npm
 
-**\## Phase 7 architecture decisions**
+---
 
-\- **\*\*A dedicated \`Activity\` collection, not a computed view\*\***:
-activity events are written   once, at the moment they happen, via
-\`services/activityService.js#recordActivity()\` --- not   reconstructed
-later by querying Tasks/Habits/Expenses/DailySummary and merging
-results. This   keeps the timeline/heatmap queries cheap (single indexed
-collection) and means the record   reflects the actual moment the user
-acted, independent of later edits to the source document. -
-**\*\*Activity logging is best-effort and never blocks the primary
-action\*\***: \`recordActivity()\`   catches and logs its own errors
-internally. Completing a task, checking off a habit, saving   an
-expense, or writing a summary must always succeed even if activity
-logging has a bug ---   the reverse (a logging failure rolling back a
-task completion) would be a worse bug. - **\*\*Only real transitions are
-logged, not every write\*\***: task/habit completion only records an  
-activity on the pending/not-done → completed transition (checked in the
-controller via a   \`wasCompleted\` flag captured before the mutation),
-never on the undo, and never on unrelated   edits (renaming a task,
-changing an expense's amount). This keeps the timeline meaningful  
-instead of noisy. - **\*\*\`date\` vs \`createdAt\`\*\***: every
-activity has both. \`createdAt\` (from \`timestamps: true\`) is   when
-the record was written --- used to sort the timeline. \`date\` is the
-UTC-midnight calendar   day the event *\*counts towards\** for the
-heatmap, which usually matches \`createdAt\` but not   always: a habit
-checked off for a specific day uses that day (matching
-\`completedDates\`   semantics), and a daily summary uses the day being
-reflected on --- so writing about yesterday   doesn't show up as "today"
-on the grid. - **\*\*Heatmap gap-filling happens server-side\*\***:
-\`getHeatmapData()\` returns one entry per day in   the requested range,
-including zero-count days, so the frontend never has to reconstruct a  
-gapless grid from sparse data --- it only handles weekday
-alignment/padding for layout.
+# Project Structure
 
-**\## UI / UX verification checklist**
-
-1\. **\*\*Dark mode\*\***: click the sun/moon icon in the navbar. The
-whole app should re-theme    instantly --- background, cards, borders,
-text, badges. Refresh the page: it should stay in    the theme you
-picked (no flash of the wrong theme on load). Clear \`localStorage\` and
-reload    with your OS set to dark mode --- it should default to dark on
-first visit. 2. **\*\*Toasts\*\***: complete a task, check off a habit,
-add/edit/delete an expense, change your    password. Each should show a
-small toast at the bottom of the screen confirming success ---    and a
-coral error toast if you stop the backend and try an action that fails.
-3. **\*\*Loading states\*\***: throttle your network (DevTools → Network
-→ Slow 3G) and reload Tasks.    You should see skeleton row
-placeholders, not a blank card or plain "Loading..." text. Type in  
- the Tasks search box --- the existing list should stay visible (dimmed)
-while it refetches,    not flash back to a skeleton on every keystroke.
-4. **\*\*Empty/error states\*\***: on a brand-new account,
-Tasks/Habits/Expenses should show a friendly    icon + message, not a
-blank card. Stop the backend and reload Tasks --- you should see a  
- "Try again" button that actually retries when the backend comes back.
-5. **\*\*Modals\*\***: open any "Add" form (Task/Habit/Expense/Profile).
-Press **\*\*Escape\*\*** --- it should    close. Click outside the modal
-(on the dark backdrop) --- it should also close. Tab through    the form
-fields --- focus should stay inside the modal. 6.
-**\*\*Responsive\*\***: resize your browser down to \~375px wide (or
-open on a phone). The sidebar    should disappear in favor of a bottom
-tab bar; the Dashboard's 3-stat row should stay    readable without
-overflowing; every page's filter row should stack instead of overflowing
-   horizontally. 7. **\*\*Performance\*\***: open DevTools → Network on
-a fresh page load. You should see small,    separate JS chunks per page
-(\`Dashboard-\*.js\`, \`Tasks-\*.js\`, etc.) loading only as you  
- navigate to them, rather than one large bundle upfront.
-
-**\## Phase 9 architecture decisions**
-
-\- **\*\*Dark mode via CSS variables, not \`dark:\` on every
-element\*\***: \`paper\`/\`ink\` color tokens   are defined as CSS
-custom properties (\`index.css\`) and referenced through Tailwind's  
-\`rgb(var(--x) / \<alpha-value\>)\` pattern. Toggling a \`.dark\` class
-on \`\<html\>\` re-themes   every \`bg-paper\`, \`text-ink\`,
-\`border-paper-border\`, etc. across the whole app at once ---   without
-touching most component files. Only the light-tint accent badges
-(priority/category   chips, stat card icons) needed explicit \`dark:\`
-overrides, since a pale tint that works on a   white card looks wrong on
-a dark one. - **\*\*Caught mid-implementation\*\***: switching \`ink\`
-to a theme-aware variable would have silently   broken the toast
-component and every modal backdrop, both of which used a hardcoded  
-\`bg-ink\` assuming it was always dark. Toasts now use a fixed neutral
-color; all five modal   forms were refactored onto one shared
-\`\<Modal\>\` component with a backdrop that's explicitly   dark in both
-themes --- fixing the bug everywhere at once instead of patching five
-files   individually. - **\*\*Shared \`\<Modal\>\` component\*\*** now
-backs every form (Task/Habit/Expense/Profile/Password):   Escape closes
-it, clicking the backdrop closes it, focus moves into the dialog on open
-and   back to the trigger element on close, and background scroll is
-locked while it's open ---   none of which existed before this phase. -
-**\*\*Skeletons only on first load, not every refetch\*\***: each list
-page tracks a   \`hasLoadedOnce\` ref; filter/search/sort changes keep
-the current list visible (dimmed via   opacity) while refetching instead
-of flashing back to a skeleton, so typing in a search box   doesn't feel
-like the page is reloading. - **\*\*Toasts are additive, not a
-replacement for inline form errors\*\***: validation errors (bad  
-input) still show inline in the form so they're next to the field that
-caused them; toasts   report the outcome of an action (saved / deleted /
-failed) after the form has already   closed, which is a different kind
-of feedback. - **\*\*Route-based code splitting\*\***: every page past
-Login/Register is \`React.lazy\`-loaded. This   dropped the main JS
-bundle from \~754 KB to \~297 KB and moved Recharts (the single biggest
-  dependency) into its own chunk that only downloads when someone visits
-Expenses or   Analytics --- most sessions never pay for it. -
-**\*\*Accessibility pass\*\***: every form input that relied on
-placeholder-only labeling got a real   \`\<label\>\` (visually hidden
-with \`sr-only\` where a visible label would be redundant), toggle  
-buttons got \`aria-pressed\`, form-level errors got \`role="alert"\`,
-and an \`AppLayout\`-level   skip link lets keyboard users jump past the
-sidebar/navbar straight to page content. -
-**\*\*\`prefers-reduced-motion\` respected globally\*\***: a single
-media query in \`index.css\`   collapses all animation/transition
-durations to near-zero for anyone with that OS setting,   rather than
-handling it per-component.
-
-**\## Phase 5 architecture decisions**
-
-\- **\*\*Dates normalized to UTC midnight, not "today per the server's
-local time"\*\***: the route   param \`/api/summaries/:date\` is parsed
-as \`YYYY-MM-DDT00:00:00.000Z\` and that exact value is   what's stored
-and queried --- so "one summary per user per day" means the same thing  
-regardless of server timezone. The frontend's \`toDateKey()\` util
-deliberately converts using   the *\*browser's\** local offset before
-formatting, so "today" always matches the user's own   calendar day
-rather than UTC's. - **\*\*POST creates, PUT edits --- enforced in both
-directions\*\***: \`POST /api/summaries\` 409s if a   summary already
-exists for that date (matching the spec's "prevent multiple summaries  
-unless explicitly editing" rule); \`PUT /api/summaries/:date\` 404s if
-one doesn't exist yet,   so the two verbs can't be used interchangeably
-to accidentally create duplicates or silently   no-op an edit. A unique
-compound index on \`{userId, date}\` backs this at the database level  
-too, in case of a race between two requests. - **\*\*Stats row computed
-live, never stored on the summary\*\***: \`computeDailyStats()\`
-re-queries   Task/Expense for that specific day on every \`GET\`, the
-same "no duplicated analytics"   principle as Phase 4's expense stats.
-Habit completion will join this same helper once   Phase 6 exists ---
-the summary document itself never grows a \`tasksCompleted\` field. -
-**\*\*Frontend date navigator disables "forward" at today\*\***:
-reflecting on a future day isn't a   meaningful action, so the UI blocks
-it outright rather than showing an error after the fact. - **\*\*Mood
-stored as an enum string (\`'good'\`), not an emoji\*\***: keeps the
-database   locale/font-independent; \`utils/mood.js\` is the single
-place emoji ↔ value mapping lives, so   swapping the emoji set later
-never touches stored data.
-
-**\## Phase 4 architecture decisions**
-
-\- **\*\*Stats computed with an aggregation pipeline, not duplicated
-fields\*\***: \`GET   /api/expenses/stats\` groups the user's expenses
-by category and by day with Mongoose's   \`aggregate()\` rather than
-storing running totals anywhere --- consistent with the spec's "no  
-duplicate analytics data" rule, and it means a deleted/edited expense is
-instantly correct   everywhere without a separate recalculation step. -
-**\*\*Aggregation requires an explicit ObjectId cast\*\***: unlike
-\`find()\`, \`aggregate()\`'s \`\$match\`   doesn't auto-cast a string
-\`userId\` against the schema's ObjectId type --- done explicitly   with
-\`new mongoose.Types.ObjectId(req.user.id)\` so the stats query doesn't
-silently match   zero documents. - **\*\*\`view=today\|week\|month\`
-reused from Tasks' pattern\*\***: same server-side date-range  
-convenience filters as Phase 3, so "today's expenses" logic lives in one
-place   (\`expenseController.js\`'s \`rangeFor\`) instead of being
-recomputed on the frontend. - **\*\*Category → color mapping
-centralized\*\*** in \`utils/expenseCategories.js\`: the category  
-badge dots, the donut chart, and (later) the cross-feature Analytics
-page all import the   same map, so a category is always the same color
-everywhere rather than each chart picking   its own palette. -
-**\*\*\`/stats\` route declared before \`/:id\`\*\*** in
-\`expenseRoutes.js\` --- otherwise Express would   try to treat the
-literal string \`stats\` as an \`:id\` route param. - **\*\*Dashboard
-quick-stats row\*\*** (Tasks today / Spent today) added now that two
-real data   sources exist --- it fetches its own lightweight counts
-rather than duplicating what   \`TodayTasks\`/\`TodayExpenses\` already
-fetch, since the full Day Score card needs Habits data   that doesn't
-exist until Phase 6.
-
-**\## Phase 3 architecture decisions**
-
-\- **\*\*Ownership enforced at the query level, not just the
-middleware\*\***: every task lookup is   \`Task.findOne({ \_id, userId:
-req.user.id })\`, not \`Task.findById(\_id)\` followed by a manual  
-check. A mismatch returns a generic 404 (not 403), so a client can't
-distinguish "not yours"   from "doesn't exist" and enumerate other
-users' task ids. - **\*\*Sort whitelisting\*\***: the \`sort\` query
-param is mapped through a fixed lookup table rather   than passed
-straight to Mongoose --- prevents sorting on arbitrary/unindexed fields
-from a   crafted request. -
-**\*\*\`view=today\|upcoming\|completed\`\*\*** are convenience filters
-computed server-side (date-range   math) so the frontend doesn't
-duplicate "what counts as today" logic in multiple places ---   the
-Dashboard widget and the Tasks page both just pass \`view=today\`. -
-**\*\*Optimistic UI updates\*\*** on the checkbox (both in \`Tasks.jsx\`
-and the dashboard widget):   the UI flips instantly and only rolls back
-by re-fetching if the API call actually fails,   so completing a task
-doesn't feel laggy. - **\*\*Compound indexes\*\*** (\`userId+dueDate\`,
-\`userId+status\`) added on the Task model up front   since those are
-exactly the two query shapes Today's Tasks / filtered views use. -
-**\*\*Sidebar shows the full planned nav\*\***
-(Habits/Expenses/Summary/Analytics/Profile/Settings)   marked "Soon"
-rather than only showing built pages --- sets accurate expectations
-without   dead links, and avoids re-building nav from scratch each
-phase.
-
-**\## Authentication architecture**
-
-DailyLife uses a two-token session model:
-
--   **Access token:** short-lived JWT (`ACCESS_TOKEN_EXPIRES_IN`,
-    default `15m`) used for authenticated API requests.
--   **Refresh token:** long-lived token (`REFRESH_TOKEN_EXPIRES_IN`,
-    default `7d`) used to maintain the user's session.
--   Authentication credentials are stored/managed through **HTTP-only
-    cookies**, keeping them inaccessible to normal frontend JavaScript.
--   Refresh tokens are hashed in MongoDB, rotated when
-    `/api/auth/refresh` is used, and revoked on logout.
--   When the access token expires, the frontend requests a refresh and
-    retries the failed API request.
--   The frontend does **not** persist JWT credentials in `localStorage`.
-
-Typical flow:
-
-``` text
-Login
-  ↓
-Backend issues access + refresh credentials
-  ↓
-HTTP-only cookies
-  ↓
-Normal authenticated API requests
-  ↓
-Access token expires
-  ↓
-Refresh endpoint
-  ↓
-New access token
-  ↓
-Original request retried
+```text
+DailyLife/
+│
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   └── server.js
+│   │
+│   ├── .env.example
+│   ├── package.json
+│   └── ...
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   └── ...
+│   │
+│   ├── .env.example
+│   ├── package.json
+│   └── ...
+│
+├── .gitignore
+└── README.md
 ```
 
-This keeps long-lived authentication credentials out of
-JavaScript-accessible storage while keeping normal API requests fast.
+---
 
-**\## Deployment**
+# Prerequisites
 
-DailyLife is structured for a split frontend/backend deployment:
+Install:
 
-``` text
-Browser
-   │
-   ▼
-Vercel — React/Vite frontend
-   │
-   ▼
-Render — Express/Node backend
-   ├── MongoDB Atlas
-   └── Cloudinary
+- Node.js 18+
+- npm
+- MongoDB Atlas account or local MongoDB
+- Cloudinary account for profile avatars
+
+For deployment, you can use MongoDB Atlas and Cloudinary as managed services.
+
+---
+
+# Local Setup
+
+## 1. Clone the repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/DailyLife.git
+cd DailyLife
 ```
 
-### Backend --- Render
+---
 
-Use:
+## 2. Backend Setup
 
-``` text
+Open a terminal:
+
+```bash
+cd backend
+npm install
+```
+
+Create `.env` from the example:
+
+### PowerShell
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### macOS / Linux
+
+```bash
+cp .env.example .env
+```
+
+Update `backend/.env`.
+
+### Backend `.env`
+
+```env
+PORT=5000
+
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster>/<database>
+
+JWT_SECRET=your_strong_random_jwt_secret
+
+ACCESS_TOKEN_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=7d
+
+ACCESS_COOKIE_NAME=dailylife_access_token
+REFRESH_COOKIE_NAME=dailylife_refresh_token
+
+CLIENT_URL=http://localhost:5173
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+```
+
+> **Important:** `JWT_SECRET` is a real secret used by the application to sign/verify JWTs. It is not a value that can be left as an arbitrary placeholder in a working environment.
+
+Start the backend:
+
+```bash
+npm run dev
+```
+
+Expected output:
+
+```text
+MongoDB connected: <host>
+DailyLife API running in development mode on port 5000
+```
+
+### Health check
+
+Open:
+
+```text
+http://localhost:5000/api/health
+```
+
+Expected response:
+
+```json
+{
+  "success": true,
+  "message": "DailyLife API is running"
+}
+```
+
+---
+
+## 3. Frontend Setup
+
+Open a second terminal:
+
+```bash
+cd frontend
+npm install
+```
+
+Create the frontend environment file.
+
+### PowerShell
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### macOS / Linux
+
+```bash
+cp .env.example .env
+```
+
+Set:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+Start the frontend:
+
+```bash
+npm run dev
+```
+
+Open the URL printed by Vite, normally:
+
+```text
+http://localhost:5173
+```
+
+---
+
+# Environment Variables
+
+## Backend
+
+```env
+PORT=5000
+MONGO_URI=
+JWT_SECRET=
+
+ACCESS_TOKEN_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=7d
+
+ACCESS_COOKIE_NAME=dailylife_access_token
+REFRESH_COOKIE_NAME=dailylife_refresh_token
+
+CLIENT_URL=http://localhost:5173
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+## Frontend
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+### Never commit secrets
+
+The following files should remain local:
+
+```text
+backend/.env
+frontend/.env
+```
+
+Make sure `.gitignore` contains:
+
+```gitignore
+node_modules/
+.env
+.env.local
+.env.*.local
+dist/
+```
+
+Never commit:
+
+- MongoDB connection strings
+- MongoDB passwords
+- JWT secrets
+- Cloudinary API secrets
+- Other private credentials
+
+---
+
+# Authentication Architecture
+
+DailyLife uses a **two-token authentication model**.
+
+```text
+                         LOGIN
+                           │
+                           ▼
+                 ┌──────────────────┐
+                 │  Express Backend │
+                 └────────┬─────────┘
+                          │
+                ┌─────────┴─────────┐
+                ▼                   ▼
+         Access Token         Refresh Token
+          Short-lived           Long-lived
+              JWT                  Token
+                │                   │
+                └─────────┬─────────┘
+                          ▼
+                  HTTP-only Cookies
+```
+
+## Access Token
+
+The access token is:
+
+- A short-lived JWT
+- Used for authenticated API requests
+- Configured through `ACCESS_TOKEN_EXPIRES_IN`
+- Default lifetime: `15m`
+
+## Refresh Token
+
+The refresh token is:
+
+- Long-lived
+- Used to obtain a new access token
+- Stored in an HTTP-only cookie
+- Rotated when `/api/auth/refresh` is called
+- Revoked when the user logs out
+- Stored securely in hashed form in MongoDB
+
+Default lifetime:
+
+```env
+REFRESH_TOKEN_EXPIRES_IN=7d
+```
+
+## Session Refresh Flow
+
+```text
+Normal API request
+       │
+       ▼
+Access token valid?
+       │
+   ┌───┴───┐
+  YES      NO
+   │        │
+   ▼        ▼
+Request   /api/auth/refresh
+success       │
+              ▼
+       Refresh cookie verified
+              │
+              ▼
+       New access token issued
+              │
+              ▼
+       Original request retried
+```
+
+The frontend does **not** store authentication tokens in `localStorage`.
+
+Instead, authentication credentials are handled through HTTP-only cookies.
+
+This prevents normal JavaScript code from directly reading the long-lived authentication credential.
+
+---
+
+# Authentication API
+
+```text
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/refresh
+POST /api/auth/logout
+GET  /api/auth/me
+```
+
+Example registration request:
+
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","email":"test@example.com","password":"secret123"}'
+```
+
+For cookie-based authentication, use a client/browser configuration that preserves cookies.
+
+The browser application handles credentials automatically through the configured Axios client.
+
+---
+
+# MongoDB Atlas
+
+DailyLife can use MongoDB Atlas as its cloud database.
+
+A typical connection string:
+
+```text
+mongodb+srv://<username>:<password>@<cluster>/<database>
+```
+
+Recommended setup:
+
+1. Create a MongoDB Atlas cluster.
+2. Create a database user.
+3. Configure the required network access.
+4. Copy the MongoDB connection string.
+5. Put it in `backend/.env`.
+6. Never commit the connection string to GitHub.
+
+Example:
+
+```env
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/dailyLife
+```
+
+If your database password contains special characters such as:
+
+```text
+@ # / : ? %
+```
+
+URL-encode them in the connection string.
+
+---
+
+# Cloudinary Setup
+
+Create a Cloudinary account and obtain:
+
+```env
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+These values belong in the **backend** `.env`.
+
+Example:
+
+```env
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+### Important
+
+The Cloudinary API secret is **not** an arbitrary secret.
+
+It must be the actual API secret provided by Cloudinary.
+
+Never expose:
+
+```env
+CLOUDINARY_API_SECRET
+```
+
+in frontend code.
+
+---
+
+# Avatar Upload Architecture
+
+The profile avatar upload flow is:
+
+```text
+User selects image
+        │
+        ▼
+React Profile form
+        │
+        ▼
+FormData
+        │
+        ▼
+PUT /api/profile
+        │
+        ▼
+Multer memory storage
+        │
+        ▼
+Image buffer
+        │
+        ▼
+Cloudinary
+        │
+        ▼
+secure_url + public_id
+        │
+        ▼
+MongoDB User document
+```
+
+The profile endpoint is:
+
+```text
+PUT /api/profile
+```
+
+The request can contain:
+
+```text
+name
+bio
+avatar
+```
+
+where `avatar` is the uploaded image file.
+
+Cloudinary assets are stored under:
+
+```text
+dailylife/avatars
+```
+
+Supported formats:
+
+```text
+JPG
+PNG
+WEBP
+GIF
+```
+
+Maximum file size:
+
+```text
+5 MB
+```
+
+---
+
+# Task Progress and Completion
+
+Tasks support both completion state and progress.
+
+```text
+Progress: 0% → 25% → 50% → 75% → 100%
+                                      │
+                                      ▼
+                              Task completed
+```
+
+Setting progress to `100%` automatically marks the task as completed.
+
+The completion flow uses optimistic UI updates:
+
+```text
+User checks task
+      │
+      ▼
+UI updates immediately
+      │
+      ▼
+API request
+      │
+ ┌────┴────┐
+ ▼         ▼
+Success   Failure
+ │         │
+ ▼         ▼
+Keep      Refetch / rollback
+state     server state
+```
+
+---
+
+# Activity Architecture
+
+DailyLife uses a dedicated `Activity` collection instead of rebuilding activity from Tasks, Habits, Expenses, and DailySummary every time.
+
+```text
+Task completed ──────┐
+Habit completed ─────┤
+Expense created ─────┼──► Activity collection
+Summary written ─────┘
+                              │
+                       ┌──────┴──────┐
+                       ▼             ▼
+                 Timeline        Heatmap
+```
+
+Activity logging is **best-effort**.
+
+If activity logging fails, the primary operation should still succeed.
+
+Only meaningful transitions are recorded.
+
+For example:
+
+```text
+Task pending → completed     ✅ Activity
+Task completed → pending     ❌ No activity
+Edit task title              ❌ No activity
+Edit expense amount          ❌ No activity
+```
+
+This keeps the activity timeline useful instead of noisy.
+
+---
+
+# Daily Summary Architecture
+
+Each user can have one summary for a calendar day.
+
+```text
+POST /api/summaries
+        │
+        ▼
+Summary exists?
+   │           │
+  NO          YES
+   │            │
+   ▼            ▼
+ CREATE       409 Conflict
+```
+
+Editing an existing summary uses:
+
+```text
+PUT /api/summaries/:date
+```
+
+A unique compound index on:
+
+```text
+{ userId, date }
+```
+
+provides database-level protection against duplicate summaries.
+
+Dates are normalized to UTC midnight on the backend, while the frontend converts the browser's local date into the appropriate date key.
+
+---
+
+# Expense Analytics
+
+Expense statistics are calculated using MongoDB aggregation rather than storing duplicated totals.
+
+```text
+Expenses
+   │
+   ▼
+MongoDB aggregate()
+   │
+   ├── Category totals
+   ├── Daily totals
+   └── Period totals
+```
+
+This means edits and deletions automatically produce correct statistics without maintaining separate running-total fields.
+
+The statistics endpoint is:
+
+```text
+GET /api/expenses/stats
+```
+
+Supported period/view filtering is based on the implemented expense routes.
+
+---
+
+# Design System
+
+DailyLife uses:
+
+- **Fraunces** — display/greeting headings
+- **Inter** — UI and body text
+- **IBM Plex Mono** — numbers, task counts, currency, and statistics
+
+Core visual palette:
+
+```text
+Paper background: #F7F7F4
+Forest green:     #1F6F5C
+Amber:            #C98A2C
+Coral:            #C1493E
+```
+
+The design system is defined primarily in:
+
+```text
+frontend/tailwind.config.js
+frontend/src/index.css
+```
+
+---
+
+# UI / UX Architecture
+
+## Dark Mode
+
+Dark mode is implemented using CSS variables rather than adding `dark:` classes to every element.
+
+The application toggles:
+
+```html
+<html class="dark">
+```
+
+and theme-aware CSS variables update the main surfaces and text.
+
+The selected theme persists across reloads.
+
+---
+
+## Shared Modal
+
+Forms such as:
+
+- Task
+- Habit
+- Expense
+- Profile
+- Password
+
+use a shared modal component.
+
+The modal supports:
+
+- Escape to close
+- Backdrop click to close
+- Focus moving into the dialog
+- Focus returning to the trigger
+- Background scroll locking
+
+---
+
+## Loading States
+
+Skeletons are shown on the initial load.
+
+During search/filter/sort refetches, the existing data remains visible and is dimmed instead of flashing back to a full-page skeleton.
+
+---
+
+## Toasts
+
+Toasts communicate the result of actions such as:
+
+- Create
+- Update
+- Delete
+- Toggle
+- Password change
+- API failure
+
+Inline form validation remains separate from toast notifications.
+
+---
+
+## Code Splitting
+
+Pages after Login/Register are loaded using `React.lazy`.
+
+This reduces the initial JavaScript payload and keeps heavier dependencies such as Recharts from being loaded until required pages are opened.
+
+---
+
+## Accessibility
+
+The UI includes:
+
+- Real form labels
+- `aria-pressed` for toggles
+- `role="alert"` for form-level errors
+- Keyboard-friendly modals
+- Skip navigation link
+- Reduced-motion support
+
+---
+
+# API Routes
+
+The main API areas are:
+
+```text
+/api/health
+
+/api/auth/register
+/api/auth/login
+/api/auth/refresh
+/api/auth/logout
+/api/auth/me
+
+/api/tasks
+
+/api/habits
+
+/api/expenses
+/api/expenses/stats
+
+/api/summaries
+/api/summaries/:date
+
+/api/activity
+/api/activity/heatmap
+
+/api/profile
+```
+
+Protected endpoints require an authenticated session.
+
+---
+
+# Deployment
+
+DailyLife can be deployed using a split frontend/backend architecture.
+
+```text
+                         INTERNET
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │    Browser    │
+                    └───────┬───────┘
+                            │
+                            ▼
+                  ┌───────────────────┐
+                  │ Vercel            │
+                  │ React + Vite      │
+                  └────────┬──────────┘
+                           │
+                           │ API requests
+                           ▼
+                  ┌───────────────────┐
+                  │ Render            │
+                  │ Node + Express    │
+                  └───────┬─────┬─────┘
+                          │     │
+              ┌───────────┘     └────────────┐
+              ▼                              ▼
+      ┌───────────────┐              ┌──────────────┐
+      │ MongoDB Atlas │              │  Cloudinary  │
+      │ Database      │              │ Avatar files │
+      └───────────────┘              └──────────────┘
+```
+
+## Backend Deployment
+
+For Render:
+
+```text
 Root Directory: backend
 Build Command: npm install
 Start Command: npm start
 ```
 
-The backend should listen on the platform-provided port:
+The backend must use the hosting platform's `PORT`.
 
-``` js
+Example:
+
+```js
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
@@ -515,99 +1010,506 @@ app.listen(PORT, "0.0.0.0", () => {
 });
 ```
 
-Configure the production environment variables in Render:
+Do not hard-code port `5000` for production deployment.
 
-``` env
-MONGO_URI=
-JWT_SECRET=
+### Production backend environment
+
+```env
+MONGO_URI=<production-mongodb-uri>
+
+JWT_SECRET=<strong-production-secret>
+
 ACCESS_TOKEN_EXPIRES_IN=15m
 REFRESH_TOKEN_EXPIRES_IN=7d
+
 ACCESS_COOKIE_NAME=dailylife_access_token
 REFRESH_COOKIE_NAME=dailylife_refresh_token
-CLIENT_URL=https://your-frontend-domain.com
 
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
+CLIENT_URL=https://your-frontend.vercel.app
+
+CLOUDINARY_CLOUD_NAME=<cloudinary-cloud-name>
+CLOUDINARY_API_KEY=<cloudinary-api-key>
+CLOUDINARY_API_SECRET=<cloudinary-api-secret>
 ```
 
-### Frontend --- Vercel
+`PORT` can normally be provided by Render automatically.
 
-Use:
+---
 
-``` text
+# Frontend Deployment
+
+For Vercel:
+
+```text
 Root Directory: frontend
 Build Command: npm run build
 Output Directory: dist
 ```
 
-Set:
+Frontend environment variable:
 
-``` env
+```env
 VITE_API_URL=https://your-backend.onrender.com/api
 ```
 
-After deployment, update the backend `CLIENT_URL` to the actual Vercel
-frontend URL. This is important for CORS and cookie-based
-authentication.
+After the frontend is deployed, update the backend:
 
-> Never commit production `.env` files or secrets to GitHub.
+```env
+CLIENT_URL=https://your-frontend.vercel.app
+```
 
-**\## Avatar uploads with Cloudinary**
+The exact URL must match the deployed frontend origin.
 
-Profile avatars are uploaded from the browser as
-\`multipart/form-data\`. The backend uses Multer with memory storage,
-uploads the image buffer to Cloudinary under \`dailylife/avatars\`, and
-stores Cloudinary's \`secure_url\` in \`User.avatar\`. The Cloudinary
-public ID is also kept internally so future replacement can overwrite
-the same user asset.
+This is especially important because DailyLife uses cookie-based authentication and credentialed API requests.
 
-Backend environment variables:
+---
 
-\`\`\`env CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret \`\`\`
+# Production Cookie / CORS Considerations
 
-Avatar rules: JPG, PNG, WEBP, or GIF; maximum 5 MB. Never expose the
-Cloudinary API secret in frontend code.
+Because authentication uses HTTP-only cookies, production deployment must correctly configure:
 
-The profile endpoint remains \`PUT /api/profile\`; send \`name\`,
-\`bio\`, and an optional \`avatar\` file in a \`FormData\` request.
+- Frontend origin
+- Backend CORS
+- Credentialed requests
+- Cookie `httpOnly`
+- Cookie `secure`
+- Cookie `sameSite`
 
-------------------------------------------------------------------------
+The frontend and backend must be configured consistently for the deployed domains.
 
-## Current implementation status
+Do not solve cookie issues by exposing the refresh token to frontend JavaScript.
 
-``` text
-Authentication        ✅ Two-token cookie-based session
-Tasks                 ✅ Progress + completion flow
-Habits                ✅ Daily completion + streaks
+---
+
+# Deployment Checklist
+
+## Before deployment
+
+- [ ] Test registration
+- [ ] Test login
+- [ ] Test logout
+- [ ] Test refresh/session restoration
+- [ ] Test expired access-token refresh
+- [ ] Test task CRUD
+- [ ] Test task progress/completion
+- [ ] Test habits
+- [ ] Test expenses
+- [ ] Test daily summaries
+- [ ] Test activity timeline/heatmap
+- [ ] Test analytics
+- [ ] Test profile updates
+- [ ] Test Cloudinary avatar upload
+- [ ] Test password change
+- [ ] Test dark mode
+- [ ] Test mobile layout
+- [ ] Test loading/error states
+
+## After deployment
+
+- [ ] Backend health endpoint works
+- [ ] Frontend loads
+- [ ] Frontend can call backend API
+- [ ] CORS works
+- [ ] Login works
+- [ ] Authentication cookies are created
+- [ ] Refreshing the page keeps the session
+- [ ] Access-token refresh works
+- [ ] Logout clears/revokes the session
+- [ ] MongoDB Atlas connection works
+- [ ] Cloudinary uploads work
+- [ ] Profile avatar remains visible after refresh
+- [ ] All user data remains isolated
+- [ ] No production secrets are exposed in the frontend
+
+---
+
+# Common Development Issues
+
+## `EADDRINUSE: address already in use :::5000`
+
+If you see:
+
+```text
+Error: listen EADDRINUSE: address already in use :::5000
+```
+
+another process is already using port `5000`.
+
+On Windows PowerShell:
+
+```powershell
+netstat -ano | findstr :5000
+```
+
+Find the PID and terminate it:
+
+```powershell
+taskkill /PID <PID> /F
+```
+
+Then start the backend again:
+
+```bash
+npm run dev
+```
+
+---
+
+## MongoDB connection failure
+
+Check:
+
+- `MONGO_URI`
+- MongoDB username
+- MongoDB password
+- Atlas Network Access
+- Database user permissions
+- URL encoding of special characters in the password
+
+---
+
+## Cloudinary `Invalid Signature`
+
+Verify all three values:
+
+```env
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+They must come from the same Cloudinary account.
+
+The API secret must be the actual Cloudinary API secret, not a custom value.
+
+If you change Cloudinary credentials, restart the backend.
+
+---
+
+## Frontend cannot connect to backend
+
+Check:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+for local development.
+
+For production:
+
+```env
+VITE_API_URL=https://your-backend.onrender.com/api
+```
+
+Also verify the backend:
+
+```env
+CLIENT_URL=https://your-frontend.vercel.app
+```
+
+---
+
+## Cookies are not working in production
+
+Check:
+
+1. The frontend uses credentialed requests.
+2. Backend CORS allows the exact frontend origin.
+3. Backend allows credentials.
+4. Cookie `secure` configuration is correct for HTTPS.
+5. `sameSite` configuration matches the frontend/backend deployment.
+6. The browser is not blocking the cookie because of an incorrect domain/origin configuration.
+
+---
+
+# Testing Checklist
+
+## Authentication
+
+- [ ] Register with valid credentials
+- [ ] Duplicate email returns a clear error
+- [ ] Invalid password returns `Invalid email or password`
+- [ ] Login creates the authentication session
+- [ ] Refreshing the page keeps the user logged in
+- [ ] Access-token expiration triggers refresh
+- [ ] Logout revokes the session
+- [ ] Protected routes reject unauthenticated users
+- [ ] A second account cannot access the first account's data
+
+## Tasks
+
+- [ ] Create task
+- [ ] Edit task
+- [ ] Delete task
+- [ ] Complete task
+- [ ] Update progress
+- [ ] Set progress to 100% and verify completion
+- [ ] Verify Today / Upcoming / Completed filters
+- [ ] Verify search
+- [ ] Verify sorting
+- [ ] Verify ownership isolation
+
+## Habits
+
+- [ ] Create habit
+- [ ] Complete habit
+- [ ] Undo completion
+- [ ] Verify streak
+- [ ] Verify activity behavior
+- [ ] Verify ownership isolation
+
+## Expenses
+
+- [ ] Create expense
+- [ ] Edit expense
+- [ ] Delete expense
+- [ ] Verify category totals
+- [ ] Verify daily trend
+- [ ] Verify Week / Month / Year views
+- [ ] Verify ownership isolation
+
+## Daily Summary
+
+- [ ] Create summary
+- [ ] Edit summary
+- [ ] Verify duplicate-date protection
+- [ ] Verify mood
+- [ ] Verify rating
+- [ ] Verify previous-day navigation
+- [ ] Verify future-day navigation is disabled
+
+## Activity
+
+- [ ] Complete task → activity appears
+- [ ] Complete habit → activity appears
+- [ ] Create expense → activity appears
+- [ ] Save reflection → activity appears
+- [ ] Undo completion → no duplicate activity
+- [ ] Edit existing data → no unrelated activity
+- [ ] Heatmap counts are correct
+- [ ] User activity remains isolated
+
+## Profile
+
+- [ ] Load profile
+- [ ] Edit name
+- [ ] Edit bio
+- [ ] Upload avatar
+- [ ] Verify Cloudinary URL is saved
+- [ ] Verify avatar after refresh
+- [ ] Change password
+
+---
+
+# Architecture Decisions
+
+## Backend architecture
+
+DailyLife uses an MVC + service-layer structure:
+
+```text
+config/
+models/
+controllers/
+routes/
+middleware/
+services/
+```
+
+Responsibilities:
+
+- **Routes** — endpoints and request validation
+- **Controllers** — HTTP-level handling
+- **Services** — reusable business logic
+- **Models** — MongoDB/Mongoose schemas
+- **Middleware** — authentication, validation, uploads, errors
+- **Config** — external service/database configuration
+
+Controllers remain thin where business logic can be moved into services.
+
+---
+
+## Password security
+
+Password hashing is performed in the Mongoose `pre("save")` hook on the `User` model.
+
+The password field is excluded from normal queries and explicitly selected when needed for login.
+
+---
+
+## JWT payload
+
+The JWT payload remains minimal:
+
+```js
+{
+  id
+}
+```
+
+The backend re-loads the current user from MongoDB rather than trusting mutable profile information embedded inside an old token.
+
+---
+
+## Ownership security
+
+Protected controllers scope database queries using the authenticated user:
+
+```js
+{
+  _id,
+  userId: req.user.id
+}
+```
+
+The backend does not trust a client-provided `userId` to determine ownership.
+
+This prevents one authenticated user from reading or modifying another user's records.
+
+---
+
+## Validation
+
+Request validation is handled through `express-validator` and shared validation middleware.
+
+Validation failures are returned as consistent API errors.
+
+---
+
+## Centralized error handling
+
+The backend uses centralized error handling so errors such as:
+
+- Invalid ObjectIds
+- Validation failures
+- Duplicate keys
+- JWT errors
+- Other controller/service errors
+
+are normalized into consistent JSON responses.
+
+---
+
+# Performance
+
+DailyLife includes:
+
+- Route-based React code splitting
+- Lazy-loaded pages
+- Recharts isolated into heavier page chunks
+- Optimistic UI updates
+- Loading skeletons
+- Reduced unnecessary refetching
+- Server-side heatmap gap filling
+- Indexed MongoDB queries
+- Aggregation for expense statistics
+
+---
+
+# Accessibility
+
+The application includes:
+
+- Semantic form labels
+- Keyboard-accessible dialogs
+- Focus management
+- `aria-pressed`
+- `role="alert"`
+- Skip navigation
+- Reduced-motion support
+- Responsive layouts
+
+---
+
+# Git Workflow
+
+Check changes:
+
+```bash
+git status
+```
+
+Stage:
+
+```bash
+git add .
+```
+
+Commit:
+
+```bash
+git commit -m "update DailyLife"
+```
+
+Push:
+
+```bash
+git push
+```
+
+Before pushing, always verify that `.env` files are not included:
+
+```bash
+git status
+```
+
+---
+
+# Security Reminder
+
+If a secret is accidentally committed to GitHub, rotating the secret is not optional.
+
+Immediately rotate:
+
+- MongoDB credentials
+- JWT secret
+- Cloudinary API secret
+- Any other exposed credentials
+
+Do not simply delete the value from the latest commit and assume the secret is safe; it may still exist in Git history.
+
+---
+
+# Current Implementation Status
+
+```text
+Authentication        ✅ Two-token cookie-based authentication
+Tasks                 ✅ CRUD + progress + completion
+Habits                ✅ Completion + streaks
 Expenses              ✅ CRUD + analytics
 Daily Summary         ✅ One summary per user/day
-Activity              ✅ Meaningful, non-duplicated events
-Analytics             ✅ Cross-feature charts
-Profile               ✅ Profile editing + password
-Avatar Uploads        ✅ Multer + Cloudinary
+Activity              ✅ Timeline + heatmap
+Analytics             ✅ Cross-feature trends
+Profile               ✅ Profile + password
+Cloudinary Avatars    ✅ Upload + replacement support
 Settings              ✅ Implemented
-Dark Mode             ✅ Persistent theme
+Dark Mode             ✅ Persistent
 Responsive UI         ✅ Desktop + mobile
 Loading/Error States  ✅
+Accessibility         ✅
+Code Splitting        ✅
 Deployment             🚀 Ready for production verification
 ```
 
-### Authentication notes
+---
 
--   Access tokens are short-lived.
--   Refresh tokens are long-lived.
--   Authentication credentials are handled with HTTP-only cookies.
--   Refresh sessions are rotated and revoked on logout.
--   No authentication token is stored in `localStorage`.
+# Project Goal
 
-### Avatar notes
+DailyLife is built to make everyday planning and self-reflection simple:
 
--   Profile images are sent as `multipart/form-data`.
--   Multer handles the incoming file in memory.
--   Cloudinary stores the image.
--   The resulting Cloudinary `secure_url` is saved to the user's MongoDB
-    document.
--   Cloudinary secrets remain backend-only.
+```text
+Plan
+  ↓
+Do
+  ↓
+Track
+  ↓
+Reflect
+  ↓
+Understand
+  ↓
+Improve
+```
+
+**Build better days, one task at a time. 🚀**
