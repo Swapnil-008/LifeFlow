@@ -1,0 +1,162 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-paper: 247 247 244;
+    --color-paper-card: 255 255 255;
+    --color-paper-border: 228 228 224;
+    --color-ink: 28 27 31;
+    --color-ink-soft: 74 74 70;
+    --color-ink-muted: 138 138 132;
+  }
+
+  .dark {
+    --color-paper: 21 21 26;
+    --color-paper-card: 29 29 36;
+    --color-paper-border: 42 42 50;
+    --color-ink: 240 240 238;
+    --color-ink-soft: 196 196 192;
+    --color-ink-muted: 142 142 138;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-paper text-ink font-sans transition-colors duration-200;
+  }
+  :focus-visible {
+    outline: 2px solid theme('colors.brand.500');
+    outline-offset: 2px;
+  }
+  /* Lets keyboard users jump past the sidebar/navbar straight to content. */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-brand-500 focus:text-white focus:text-sm focus:font-medium focus:px-3 focus:py-2 focus:rounded-lg;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-paper-card border border-paper-border rounded-2xl shadow-card transition-colors duration-200;
+  }
+  .stat-number {
+    @apply font-mono font-semibold tabular-nums;
+  }
+}
+
+@keyframes toast-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.toast-pop {
+  animation: toast-pop 0.18s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out;
+}
+
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.modal-pop {
+  animation: modal-pop 0.16s ease-out;
+}
+
+@keyframes backdrop-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.modal-backdrop {
+  animation: backdrop-fade 0.16s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+
+@layer components {
+  .page-shell {
+    @apply w-full max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-9;
+  }
+
+  .page-header {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-7 lg:mb-8;
+  }
+
+  .page-title {
+    @apply font-display text-2xl sm:text-3xl lg:text-[2.1rem] leading-tight tracking-[-0.02em];
+  }
+
+  .page-subtitle {
+    @apply text-sm text-ink-muted mt-1.5 leading-relaxed;
+  }
+
+  .section-card {
+    @apply card p-5 sm:p-6;
+  }
+
+  .tab-list {
+    @apply inline-flex items-center gap-1 rounded-xl border border-paper-border bg-paper-card p-1 shadow-sm;
+  }
+
+  .tab-button {
+    @apply min-h-9 px-3.5 sm:px-4 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all;
+  }
+
+  .tab-button-active {
+    @apply bg-brand-500 text-white shadow-sm;
+  }
+
+  .tab-button-idle {
+    @apply text-ink-soft hover:bg-paper hover:text-ink;
+  }
+}
+
+@layer components {
+  .input-base {
+    @apply px-3 py-2 rounded-xl border border-paper-border bg-paper-card text-sm text-ink focus:outline-none focus:ring-2 focus:ring-brand-500;
+  }
+}
